@@ -1,7 +1,5 @@
 package com.br.marks.api.controller;
 
-import com.br.marks.api.config.ModelMapperConfig;
-import com.br.marks.api.domain.User;
 import com.br.marks.api.domain.dto.UserDTO;
 import com.br.marks.api.service.UserService;
 import org.modelmapper.ModelMapper;
@@ -40,5 +38,11 @@ public class UserController {
     URI uri = ServletUriComponentsBuilder
         .fromCurrentRequest().path("/{id}").buildAndExpand(service.create(obj).getId()).toUri();
     return ResponseEntity.created(uri).build();
+  }
+
+  @PutMapping(value = "/{id}")
+  public ResponseEntity<UserDTO> update(@PathVariable Integer id, @RequestBody UserDTO obj) {
+    obj.setId(id);
+    return ResponseEntity.ok().body(mapper.map(service.update(obj), UserDTO.class));
   }
 }
