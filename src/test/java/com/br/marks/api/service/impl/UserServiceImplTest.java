@@ -9,6 +9,7 @@ import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.mockito.Spy;
 import org.modelmapper.ModelMapper;
 import org.springframework.boot.test.context.SpringBootTest;
 
@@ -16,7 +17,7 @@ import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.anyInt;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 @SpringBootTest
 class UserServiceImplTest {
@@ -26,6 +27,7 @@ class UserServiceImplTest {
     public static final String EMAIL    = "valdir@gmail.com";
     public static final String PASSWORD = "123";
 
+    @Spy
     @InjectMocks
     private UserServiceImpl service;
 
@@ -50,6 +52,8 @@ class UserServiceImplTest {
         when(repository.findById(anyInt())).thenReturn(optionalUser);
 
         User response = service.findById(ID);
+
+        verify(service, times(1)).findById(ID);
 
         assertNotNull(response);
         assertEquals(User.class, response.getClass());
