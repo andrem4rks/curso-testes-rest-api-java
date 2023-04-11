@@ -29,6 +29,7 @@ class UserServiceImplTest {
     public static final String EMAIL    = "valdir@gmail.com";
     public static final String PASSWORD = "123";
     public static final int INDEX = 0;
+    public static final String E_MAIL_JA_CADASTRADO_NO_SISTEMA = "E-mail já cadastrado no sistema";
 
     @Spy
     @InjectMocks
@@ -122,8 +123,9 @@ class UserServiceImplTest {
             service.create(userDTO);
         } catch (Exception ex) {
             assertEquals(DataIntegratyViolationException.class, ex.getClass());
-            assertEquals("E-mail já cadastrado no sistema", ex.getMessage());
+            assertEquals(E_MAIL_JA_CADASTRADO_NO_SISTEMA, ex.getMessage());
         }
+        verify(service, times(1)).create(userDTO);
     }
 
     @Test
@@ -133,6 +135,7 @@ class UserServiceImplTest {
         User response = service.update(userDTO);
 
         verify(service, times(1)).update(userDTO);
+        verify(repository, times(1)).save(mapper.map(userDTO, User.class));
 
         assertNotNull(response);
         assertEquals(User.class, response.getClass());
@@ -143,7 +146,27 @@ class UserServiceImplTest {
     }
 
     @Test
-    void delete() {
+    void whenUpdateThenReturnAnDataIntegrityViolationException() {
+        when(repository.findByEmail(anyString()))
+            .thenReturn(optionalUser);
+
+        try {
+            optionalUser.get().setId(-1);
+            service.update(userDTO);
+        } catch (Exception ex) {
+            assertEquals(DataIntegratyViolationException.class, ex.getClass());
+            assertEquals(E_MAIL_JA_CADASTRADO_NO_SISTEMA, ex.getMessage());
+        }
+        verify(service, times(1)).update(userDTO);
+    }
+
+    @Test
+    void deleteWithSuccess() {
+        when(repository.findById(anyInt())).thenReturn(optionalUser);
+        doNothing().when(repository).deleteById(anyInt());
+        service.delete(ID);
+        verify(service, times(1)).delete(anyInt());
+        verify(repository, times(1)).deleteById(anyInt());
     }
 
     private void startUser() {
