@@ -30,6 +30,7 @@ class UserServiceImplTest {
     public static final String PASSWORD = "123";
     public static final int INDEX = 0;
     public static final String E_MAIL_JA_CADASTRADO_NO_SISTEMA = "E-mail já cadastrado no sistema";
+    public static final String OBJETO_NAO_ENCONTRADO = "Objeto não encontrado";
 
     @Spy
     @InjectMocks
@@ -74,7 +75,7 @@ class UserServiceImplTest {
             service.findById(-1);
         } catch (Exception ex) {
             assertEquals(ObjectNotFoundException.class, ex.getClass());
-            assertEquals("Objeto não encontrado", ex.getMessage());
+            assertEquals(OBJETO_NAO_ENCONTRADO, ex.getMessage());
         }
         verify(service, times(1)).findById(-1);
     }
@@ -167,6 +168,20 @@ class UserServiceImplTest {
         service.delete(ID);
         verify(service, times(1)).delete(anyInt());
         verify(repository, times(1)).deleteById(anyInt());
+    }
+
+    @Test
+    void deleteWithObjectNotFoundException() {
+        when(repository.findById(anyInt())).thenReturn(Optional.empty());
+
+        try {
+            service.delete(-1);
+        } catch (Exception ex) {
+            assertEquals(ObjectNotFoundException.class, ex.getClass());
+            assertEquals(OBJETO_NAO_ENCONTRADO, ex.getMessage());
+        }
+        verify(service, times(1)).findById(anyInt());
+        verify(repository, times(1)).findById(anyInt());
     }
 
     private void startUser() {
