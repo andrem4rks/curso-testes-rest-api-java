@@ -67,14 +67,15 @@ class UserServiceImplTest {
 
     @Test
     void whenFindByIdThenReturnAnObjectNotFoundException() {
-        when(repository.findById(anyInt())).thenThrow(new ObjectNotFoundException("Objeto não encontrado"));
+        when(repository.findById(anyInt())).thenReturn(Optional.empty());
 
         try{
-            service.findById(ID);
+            service.findById(-1);
         } catch (Exception ex) {
             assertEquals(ObjectNotFoundException.class, ex.getClass());
             assertEquals("Objeto não encontrado", ex.getMessage());
         }
+        verify(service, times(1)).findById(-1);
     }
 
     @Test
@@ -126,7 +127,19 @@ class UserServiceImplTest {
     }
 
     @Test
-    void update() {
+    void whenUpdateThenReturnSuccess() {
+        when(repository.save(any())).thenReturn(user);
+
+        User response = service.update(userDTO);
+
+        verify(service, times(1)).update(userDTO);
+
+        assertNotNull(response);
+        assertEquals(User.class, response.getClass());
+        assertEquals(ID, response.getId());
+        assertEquals(NAME, response.getName());
+        assertEquals(EMAIL, response.getEmail());
+        assertEquals(PASSWORD, response.getPassword());
     }
 
     @Test
