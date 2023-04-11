@@ -13,6 +13,7 @@ import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
+import javax.print.attribute.standard.MediaSize;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -114,7 +115,25 @@ class UserControllerTest {
     }
 
     @Test
-    void update() {
+    void whenUpdateThenReturnSuccess() {
+        when(service.update(userDTO)).thenReturn(user);
+        when(mapper.map(any(), any())).thenReturn(userDTO);
+
+        ResponseEntity<UserDTO> response = controller.update(ID ,userDTO);
+
+        assertNotNull(response);
+        assertNotNull(response.getBody());
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertEquals(ResponseEntity.class, response.getClass());
+        assertEquals(UserDTO.class, response.getBody().getClass());
+
+        assertEquals(ID, response.getBody().getId());
+        assertEquals(NAME, response.getBody().getName());
+        assertEquals(EMAIL, response.getBody().getEmail());
+
+        verify(service, times(1)).update(userDTO);
+        verify(controller, times(1)).update(ID, userDTO);
+        verify(mapper, times(1)).map(any() ,any());
     }
 
     @Test
