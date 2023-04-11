@@ -9,6 +9,9 @@ import org.mockito.*;
 import org.modelmapper.ModelMapper;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.mock.web.MockHttpServletRequest;
+import org.springframework.web.context.request.RequestContextHolder;
+import org.springframework.web.context.request.ServletRequestAttributes;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -43,6 +46,10 @@ class UserControllerTest {
     void setUp() {
         MockitoAnnotations.openMocks(this);
         startUser();
+
+        MockHttpServletRequest mockRequest = new MockHttpServletRequest();
+        ServletRequestAttributes attributes = new ServletRequestAttributes(mockRequest);
+        RequestContextHolder.setRequestAttributes(attributes);
     }
 
     @Test
@@ -64,6 +71,7 @@ class UserControllerTest {
         assertEquals(PASSWORD, response.getBody().getPassword());
 
         verify(service, times(1)).findById(ID);
+        verify(controller, times(1)).findById(ID);
         verify(mapper, times(1)).map(any(), any());
     }
 
@@ -87,11 +95,22 @@ class UserControllerTest {
         assertEquals(PASSWORD, response.getBody().get(INDEX).getPassword());
 
         verify(service, times(1)).findAll();
+        verify(controller, times(1)).findAll();
         verify(mapper, times(1)).map(any(), any());
     }
 
     @Test
-    void create() {
+    void whenCreateThenReturnCreated() {
+        when(service.create(any())).thenReturn(user);
+
+        ResponseEntity<UserDTO> response = controller.create(userDTO);
+
+        assertEquals(ResponseEntity.class, response.getClass());
+        assertEquals(HttpStatus.CREATED, response.getStatusCode());
+        assertNotNull(response.getHeaders().get("Location"));
+
+        verify(service, times(1)).create(any());
+        verify(controller, times(1)).create(any());
     }
 
     @Test
