@@ -33,6 +33,9 @@ class ControllerExceptionErrorTest {
         assertNotNull(response);
         assertNotNull(response.getBody());
         assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
+        assertEquals(StandardError.class, response.getBody().getClass());
+        assertEquals("Objeto não encontrado", response.getBody().getError());
+        assertEquals(404, response.getBody().getStatus());
     }
 
     @Test
